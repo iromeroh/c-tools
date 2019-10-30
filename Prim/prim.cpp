@@ -26,14 +26,16 @@ class Graph {
         void set_matrix(int *);
         
         bool add_edge(int, int, int);
-        
+        bool add_edge_letter(char, char, int);
         void prim ();
         
         void print_matrix();
         
         void print_graph();
+	void print_graph_letter();
         
         void print_MST();
+	void print_MST_letter();
 
 };
 
@@ -64,6 +66,19 @@ bool Graph::add_edge(int i, int j, int weight){
      
      matrix[i*V+j] = weight;
      matrix[j*V+i] = weight;
+     return true;
+}
+
+bool Graph::add_edge_letter(char i, char j, int weight){
+     
+     i = i - 65;
+     j = j - 65;
+
+     if (i<0 || j<0 || i>=V || j>=V )
+         return false;
+     
+     matrix[(i*V+j)] = weight;
+     matrix[(j*V+i)] = weight;
      return true;
 }
 
@@ -121,12 +136,12 @@ void Graph::prim ()
 
 void Graph::print_matrix(){
     for( int i=0;i<V; i++){
-        cout << "| ";
+        cerr << "| ";
         for(int j=0;j<V;j++){
  
-                cout << matrix[i*V+j] << " ";
+                cerr << matrix[i*V+j] << " ";
         }
-        cout << " |\n";
+        cerr << " |\n";
     }    
 }
 
@@ -142,35 +157,90 @@ void Graph::print_graph(){
     cout << "}\n";
 }
 
+
+void Graph::print_graph_letter(){
+    fprintf(stdout, "graph{\n");
+    fprintf(stderr, "graph{\n");
+    char i_str[2]="";
+    char j_str[2]=""; 
+    
+    for( int i=0;i<V; i++){
+        for(int j=i;j<V;j++){
+            if ( matrix[i*V+j] > 0 ){
+		i_str[0]=(char)i+65;
+                i_str[1]=0x00;
+		j_str[0]=(char)j+65;
+                j_str[1]=0x00; 
+                fprintf(stdout,"  %s -- %s [label=\"%d\"];\n",i_str,j_str,matrix[i*V+j]);
+		fprintf(stderr,"  %s -- %s [label=\"%d\"];\n",i_str,j_str,matrix[i*V+j]);
+             }
+        }
+    }
+    fprintf(stdout, "}\n");
+    fprintf(stderr, "}\n");
+}
+
 void Graph::print_MST(){
     cout << "graph{\n";
     
     for (int i=1;i<V;i++){
-            cout << "    "<<parent[i]<<" -- "<< i << " [label=\""<< matrix[ (parent[i]*V)+i] << "\"]\n";
+            cout << "    "<<parent[i]<<" -- "<< i << " [label=\""<< matrix[ (parent[i]*V)+i] << "\"];\n";
     } 
     cout << "}\n";
 }
 
-int main(int argc, char*argv[]){
-    Graph g(9);
-    
-   int graph[9][9] = {{0, 4, 0, 0,  0, 0, 0, 8, 0},
-                      {4, 0, 8, 0,  0, 0, 0, 11, 0},
-                      {0, 8, 0, 7,  0, 4, 0, 0, 2},
-                      {0, 0, 7, 0,  9, 14, 0, 0, 0},
-                      {0, 0, 0, 9,  0, 10, 0, 0, 0},
-                      {0, 0, 4, 14, 10, 0, 2, 0, 0},
-                      {0, 0, 0, 0,  0, 2, 0, 1, 6},
-                      {8, 11, 0, 0, 0, 0, 1, 0, 7},
-                      {0, 0, 2, 0,  0, 0, 6, 7, 0}
-                     };
-    g.set_matrix((int *)graph);
-        
-    
-    g.print_graph();
-    
-    g.prim();
-    
-    g.print_MST();
+void Graph::print_MST_letter(){
+    cout << "graph{\n";
+    cerr << "graph{\n";
+    char p_i_str[2]="";
+    char i_str[2]="";
+
+    for (int i=1;i<V;i++){
+            p_i_str[0] = (char)(parent[i]+65);
+            i_str[0]=char(i+65);
+            cout << "    "<< p_i_str<<" -- "<< i_str << " [label=\""<< matrix[ (parent[i]*V)+i] << "\"];\n";
+            cerr << "    "<< p_i_str<<" -- "<< i_str << " [label=\""<< matrix[ (parent[i]*V)+i] << "\"];\n";
+    } 
+    cout << "}\n";
+    cerr << "}\n";
 }
+
+int main(int argc, char*argv[]){
+    Graph g(7);
+    
+    g.add_edge_letter('A','B',7);
+    g.add_edge_letter('B','C',9);
+    g.add_edge_letter('C','D',10);
+    g.add_edge_letter('A','C',11);
+    g.add_edge_letter('C','E',9);
+    g.add_edge_letter('D','E',7);
+    g.add_edge_letter('A','G',8);
+    g.add_edge_letter('E','G',8);
+    g.add_edge_letter('G','F',13);
+    g.add_edge_letter('E','F',11);
+
+    if (argc>1){
+       if(strcmp(argv[1],"show")==0){
+         g.print_graph_letter();
+       }
+       if(strcmp(argv[1],"prim")==0){
+         g.prim();
+         g.print_MST_letter();
+       }
+       
+       if(strcmp(argv[1],"matrix")==0){
+         g.print_matrix();
+       }
+       if(strcmp(argv[1],"s")==0){
+         g.print_graph();
+       }
+       if(strcmp(argv[1],"p")==0){
+         g.prim();
+         g.print_MST();
+       }              
+    
+    }
+    
+}
+
 
