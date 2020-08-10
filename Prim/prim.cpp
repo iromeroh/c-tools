@@ -1,5 +1,6 @@
 #include <iostream>
 #include <list>
+#include <map>
 #include <malloc.h>
 #include <string.h>
 
@@ -16,26 +17,34 @@ class Graph {
     int  * matrix;
     
     int * parent;
+    
+    map<string, int> labels;
+    map<int, string> indexes;
 
     public:
         Graph(int);
-        
         
         int min_key ( int *, int * );
         
         void set_matrix(int *);
         
         bool add_edge(int, int, int);
-        bool add_edge_letter(char, char, int);
+        
+        bool add_edge_str(char, char, int);
+        
+        bool add_edge_str(string, string , int );
+        
         void prim ();
         
         void print_matrix();
         
         void print_graph();
-	void print_graph_letter();
+		void print_graph_letter();
+		void print_graph_str();
         
         void print_MST();
-	void print_MST_letter();
+		void print_MST_letter();
+		void print_MST_str();
 
 };
 
@@ -69,7 +78,7 @@ bool Graph::add_edge(int i, int j, int weight){
      return true;
 }
 
-bool Graph::add_edge_letter(char i, char j, int weight){
+bool Graph::add_edge_str(char i, char j, int weight){
      
      i = i - 65;
      j = j - 65;
@@ -81,6 +90,44 @@ bool Graph::add_edge_letter(char i, char j, int weight){
      matrix[(j*V+i)] = weight;
      return true;
 }
+
+bool Graph::add_edge_str(string si, string sj, int weight){
+     int i=0,j=0;
+     
+     int l = labels.size();
+     
+     if (labels.find(si) == labels.end()){
+		 //cerr << si << " not known, adding it at index " << l << "\n";
+		 labels[si] = l;
+		 indexes[l] = si;
+		 i = l;
+		 l++;
+	 }else{
+		 i = labels[si];
+		 //cerr << si << " known, found at index " << i << "\n";
+	 }
+
+     if (labels.find(sj) == labels.end()){
+		 //cerr << sj << " not known, adding it at index " << l << "\n" ;
+		 labels[sj] = l;
+		 indexes[l] = sj;
+		 j = l;
+		 l++;
+		 
+	 }else{
+		 j = labels[sj];
+		 //cerr << sj << " known, found at index " << j << "\n";
+	 } 
+
+
+     if (i<0 || j<0 || i>=V || j>=V )
+         return false;
+     
+     matrix[(i*V+j)] = weight;
+     matrix[(j*V+i)] = weight;
+     return true;
+}
+
 
 int Graph::min_key(int * keys, int * mtset)
 {
@@ -108,6 +155,7 @@ void Graph::prim ()
 {
     int key [V];
     int mtset [V];
+    int s=1;
     
     for (int i=0;i<V; i++){
         key[i] = MAX_INT;
@@ -135,8 +183,16 @@ void Graph::prim ()
 }
 
 void Graph::print_matrix(){
+	cerr << "   ";
+	for( int i=0;i<V; i++){
+		string s = indexes[i];
+		cerr << s << " ";
+	}
+	cerr << "\n";
+	
     for( int i=0;i<V; i++){
-        cerr << "| ";
+		string s = indexes[i];
+        cerr << s << " | ";
         for(int j=0;j<V;j++){
  
                 cerr << matrix[i*V+j] << " ";
@@ -180,6 +236,26 @@ void Graph::print_graph_letter(){
     fprintf(stderr, "}\n");
 }
 
+void Graph::print_graph_str(){
+    fprintf(stdout, "graph{\n");
+    fprintf(stderr, "graph{\n");
+    
+    for( int i=0;i<V; i++){
+        for(int j=i;j<V;j++){
+            if ( matrix[i*V+j] > 0 ){
+				string i_str=indexes[i];
+				string j_str=indexes[j];
+				
+                fprintf(stdout,"  %s -- %s [label=\"%d\"];\n", i_str.c_str(), j_str.c_str(),matrix[i*V+j]);
+				fprintf(stderr,"  %s -- %s [label=\"%d\"];\n", i_str.c_str(), j_str.c_str(),matrix[i*V+j]);
+             }
+        }
+    }
+    fprintf(stdout, "}\n");
+    fprintf(stderr, "}\n");
+}
+
+
 void Graph::print_MST(){
     cout << "graph{\n";
     
@@ -205,27 +281,79 @@ void Graph::print_MST_letter(){
     cerr << "}\n";
 }
 
+void Graph::print_MST_str(){
+    cout << "graph{\n";
+    cerr << "graph{\n";
+    string p_i_str="";
+    string i_str="";
+
+    for (int i=1;i<V;i++){
+            p_i_str = indexes[parent[i]];
+            i_str=indexes[i];
+            cout << "    "<< p_i_str<<" -- "<< i_str << " [label=\""<< matrix[ (parent[i]*V)+i] << "\"];\n";
+            cerr << "    "<< p_i_str<<" -- "<< i_str << " [label=\""<< matrix[ (parent[i]*V)+i] << "\"];\n";
+    } 
+    cout << "}\n";
+    cerr << "}\n";
+}
+
 int main(int argc, char*argv[]){
-    Graph g(7);
+    Graph g(11);
     
-    g.add_edge_letter('A','B',7);
-    g.add_edge_letter('B','C',9);
-    g.add_edge_letter('C','D',10);
-    g.add_edge_letter('A','C',11);
-    g.add_edge_letter('C','E',9);
-    g.add_edge_letter('D','E',7);
-    g.add_edge_letter('A','G',8);
-    g.add_edge_letter('E','G',8);
-    g.add_edge_letter('G','F',13);
-    g.add_edge_letter('E','F',11);
+    g.add_edge_str("O","A",5);
+    g.add_edge_str("A","D",2);
+    g.add_edge_str("D","G",10);
+    g.add_edge_str("G","T",7);
+    g.add_edge_str("O","C",3);
+    g.add_edge_str("C","F",4);
+    g.add_edge_str("F","H",3);
+    g.add_edge_str("H","T",15);
+    g.add_edge_str("O","B",7);
+    g.add_edge_str("B","E",7);
+    g.add_edge_str("E","I",1);
+    g.add_edge_str("I","T",20);
+    g.add_edge_str("A","C",6);
+    g.add_edge_str("D","C",10);
+    g.add_edge_str("D","F",3);
+    g.add_edge_str("F","G",2);
+    g.add_edge_str("G","H",9);
+    g.add_edge_str("H","I",5);
+    g.add_edge_str("E","H",6);
+    g.add_edge_str("E","F",3);
+    g.add_edge_str("E","C",8);
+    g.add_edge_str("B","C",1);
+
+    /* g.add_edge_str('A','J',5);
+    g.add_edge_str('D','A',2);
+    g.add_edge_str('G','D',10);
+    g.add_edge_str('K','G',7);
+    g.add_edge_str('C','J',3);
+    g.add_edge_str('F','C',4);
+    g.add_edge_str('H','F',3);
+    g.add_edge_str('K','H',15);
+    g.add_edge_str('B','J',7);
+    g.add_edge_str('E','B',7);
+    g.add_edge_str('I','E',1);
+    g.add_edge_str('K','I',20);
+    g.add_edge_str('C','A',6);
+    g.add_edge_str('C','D',10);
+    g.add_edge_str('F','D',3);
+    g.add_edge_str('G','F',2);
+    g.add_edge_str('H','G',9);
+    g.add_edge_str('I','H',5);
+    g.add_edge_str('H','E',6);
+    g.add_edge_str('F','E',3);
+    g.add_edge_str('C','E',8);
+    g.add_edge_str('C','B',1);*/
+
 
     if (argc>1){
        if(strcmp(argv[1],"show")==0){
-         g.print_graph_letter();
+         g.print_graph_str();
        }
        if(strcmp(argv[1],"prim")==0){
          g.prim();
-         g.print_MST_letter();
+         g.print_MST_str();
        }
        
        if(strcmp(argv[1],"matrix")==0){

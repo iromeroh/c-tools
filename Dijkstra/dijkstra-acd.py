@@ -11,6 +11,12 @@ def label(i):
 	else:
 		return 'A'+str(i-1)
 
+cities=['Gary', 'Fort_Wayne', 'Evansville', 'Terre_Haute', 'South_Bend']
+
+def label_city(i):
+
+	return cities[i]
+
 class Graph:
 
     def __init__(self, V):
@@ -58,29 +64,24 @@ class Graph:
                     self.dist[v] = self.dist[u]+ self.matrix[u][v]
                     
     def print_dist(self, to_label):
-        perror( "Node\tdistance:")
+        perror( "Vertice\tdistancia:")
         
         for i in xrange(self.V):
             perror( to_label(i)+"\t"+str(self.dist[i]))
         
 
-g = Graph(11)
+g = Graph(5)
 
-g.matrix = [[0,3, 0, 0, 0, 0, 0, 0, 0, 0,0],  # inicio
-           [0, 0, 2, 4, 2, 2, 0, 0, 0, 0,0],  # A0
-           [0, 0, 0, 4, 2, 2, 5, 0, 0, 0,0],   # A1
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0],   # A2
-           [0, 0, 0, 0, 0, 0, 5, 0, 0, 0,0],  # A3
-           [0, 0, 0, 0, 0, 0, 5, 0, 0, 0,0], # A4
-           [0, 0, 0, 0, 0, 0, 0, 2, 4, 0,0],   # A5
-           [0, 0, 0, 0, 0, 0, 0, 0, 4, 2,0],  # A6
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0],   # A7
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,2],  # A8
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0],  # A9
+g.matrix = [ [ 0, 132, 0, 164, 58],
+           [ 132, 0, 290, 201, 79],
+           [ 0, 290, 0, 113, 303], 
+           [ 164, 201, 113, 0, 196], 
+           [ 58, 79, 303, 196, 0]   
           ]
-g.dot(label)
+          
+g.dot(label_city)
  
 g.dijkstra(0)
 
-g.print_dist(label)
+g.print_dist(label_city)
 
